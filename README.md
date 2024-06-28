@@ -1,5 +1,4 @@
-# Differentiating_ChatGPT_AND_Humans
-Differentiating ChatGPT from Humans: Detecting ChatGPT-Generated Text and Human Text Using Machine Learning - Arabic langwage
+#Differentiating ChatGPT from Humans: Detecting ChatGPT-Generated Text and Human Text Using Machine Learning - Arabic langwage
 
 1.	Data set has 10,000 records. [5,000 records are taken from ChatGPT generated Arabic Dataset CIDAR  and other 5000 records taken from human written articles MNAD (Moroccan News Articles) Dataset  and are merged]
 
