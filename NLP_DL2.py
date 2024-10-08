@@ -54,7 +54,7 @@ model.summary()
 callbacks = [keras.callbacks.ModelCheckpoint("NLP_CNN02.keras",save_best_only=True)]
 
 model.fit(encode_X_train,encode_y_train, epochs=5, callbacks=callbacks)
-model.save_weights('NLP_CNN02.h5')
+model.save_weights('NLP_CNN02.weights.h5')
 print(f"Test loss and acc: {model.evaluate(encode_X_test,encode_y_test)}")
 
 print("predictions: New values")
