@@ -20,7 +20,7 @@ def build_model(max_tokens=23, hidden_dim=64):
     x = Dense(hidden_dim, activation="relu")(x)
     x = Dropout(0.5)(x)
     x = Flatten()(x)
-    outputs = Dense(2, activation="sigmoid")(x) # binary activation output(sigmoid:1,softmax":multi class))
+    outputs = Dense(2, activation="softmax")(x) # binary activation output(sigmoid:1,softmax":multi class))
     model = keras.Model(inputs, outputs)
     model.compile(optimizer=OPTIMISER,loss=LOSS)
     return model
@@ -62,7 +62,7 @@ class Sparrow:
         #self.init_weights =self. model.get_weights()
         self.max_tokens = max_tokens
         callbacks = [keras.callbacks.ModelCheckpoint("NLP_CNN01.keras",save_best_only=True)]
-        self.model.fit(x,y, epochs=5, callbacks=callbacks)
+        self.model.fit(x,y, epochs=2, callbacks=callbacks)
 
     def isInDanger(self):
         return False
@@ -71,7 +71,7 @@ class Sparrow:
         self.model = build_model(max_tokens = self.max_tokens)
         #self.init_weights = self.model.get_weights()
         callbacks = [keras.callbacks.ModelCheckpoint("NLP_CNN01.keras",save_best_only=True)]
-        self.model.fit(self.x,self.y, epochs=5, callbacks=callbacks)
+        self.model.fit(self.x,self.y, epochs=2, callbacks=callbacks)
 
     def SearchContinue(self):
         old_weights = self.model.get_weights()

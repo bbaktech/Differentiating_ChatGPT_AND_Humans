@@ -63,3 +63,25 @@ model_p.save_weights('NLP_CNN02.SSA.weights.h5')
 p_train_score = model_p.evaluate(encode_X_train, encode_y_train, batch_size=32, verbose=0)
 p_test_score = model_p.evaluate(encode_X_test, encode_y_test, batch_size=32, verbose=0)
 print("SSA -- train: {:.4f}  test: {:.4f}".format(p_train_score, p_test_score))
+
+
+print("predictions: New values")
+xx_test = [' مجموع 5 و 7 و 9 يساوي 21.']
+#should get 1
+encode_xx_test = text_vectorization(xx_test)
+pr = model_p.predict(encode_xx_test)
+print(xx_test)
+print(pr[0])
+pp = np.argmax(pr[0])
+
+Result = lambda a :  '1 - Chat GPT genarated' if(a > 0) else '0 - human created'
+print(Result(pp))
+
+xx_test = [ "رغم استخدام تنظيم داعش أحدث وسائل الإخراج والتصوير السينمائي، إلا أنه غفل عن خطأ كشف حقيقة الفيديو الوحشي الذي يظهر عملية نحر الرهائن المصريين الأقباط. وفي فيديو ذبح الرهائن المصريين الذي بث أوّل من أمس الأحد، يسمع بوضوح صوت المخرج بالدقيقة 3:28، يأمر ""الممثلين الدواعش"" ببدء عملية تنفيذ الإعدام باللغة الإنجليزية. ويرى خبراء أن مخاطبة المخرج للعناصر باللغة الإنجليزية، يدل أنهم ليسوا من ليبيا، ويؤكد أن أغلب مقاتلي داعش في ليبيا من المرتزقة الأجانب نظراً لضخامة أحجامهم، وعدم إجادتهم اللغة العربية، لغة القرآن الكريم. وبث تنظيم داعش في ليبيا، فيديو يظهر نحر 21 مصرياً، مستخدماً أحدث تقنيات الإخراج والتصوير باستخدام أكثر من كاميرا، وتقطيع اللقطات وتقنيات المونتاج."]
+#should get 0
+encode_xx_test = text_vectorization(xx_test)
+pr = model_p.predict(encode_xx_test)
+print(xx_test)
+print(pr[0])
+pp = np.argmax(pr[0])
+print(Result(pp))
