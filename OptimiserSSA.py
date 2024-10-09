@@ -9,40 +9,25 @@ BIG_SCORE = 1.e6  # type: float
 NO_SPARROWS = 20
 NO_PRD = NO_SPARROWS /3
 SC = NO_SPARROWS *20 /100
-NO_ITERATIONS = 4
-LOSS = 'binary_crossentropy' # Loss function
-OPTIMISER = "rmsprop"
-
-def build_model(max_tokens=23, hidden_dim=64):
-    inputs = keras.Input(shape=(max_tokens,))
-    x = Dense(hidden_dim, activation="relu")(inputs)
-    x = Dropout(0.5)(x)
-    x = Dense(hidden_dim, activation="relu")(x)
-    x = Dropout(0.5)(x)
-    x = Flatten()(x)
-    outputs = Dense(2, activation="softmax")(x) # binary activation output(sigmoid:1,softmax":multi class))
-    model = keras.Model(inputs, outputs)
-    model.compile(optimizer=OPTIMISER,loss=LOSS)
-    return model
+NO_ITERATIONS = 5
 
 class ProgressBar:
-    def __init__(self, steps, updates=1):
-        self.step = 0
-        self.step_size = (steps // updates)
-        self.total_steps = steps
+    #steps is number of iterations
+    def __init__(self, steps, updates=100):
+        self.step = 0.
+        self.step_size = (updates / steps)
         self.updates = updates
         bar = self._make_bar(0)
         print(bar, end=' ')
 
     def update(self, i):
-        if i % self.step_size > 0:
-            return
-        self.step = i // self.step_size
+        self.step = i * self.step_size 
         bar = self._make_bar(i)
         print(bar, end=' ')
+#        print(i)
 
     def done(self):
-        self.step = self.total_steps
+        self.step = self.updates
         bar = self._make_bar(self.updates)
         print(bar)
 
@@ -50,28 +35,27 @@ class ProgressBar:
         bar = "["
         for x in range(self.updates):
             print("\r", end=' ')
-            bar += "=" if x < self.step else " "
+            bar += "=" if x < int(self.step) else " "
         bar += "]"
         return bar
 
 class Sparrow:
-    def __init__(self,x,y, max_tokens):
+    def __init__(self,x,y,structure, max_tokens):
         self.x = x
         self.y = y
-        self.model = build_model(max_tokens = max_tokens)
-        #self.init_weights =self. model.get_weights()
+        self.structure = structure
         self.max_tokens = max_tokens
+        self.model = keras.models.model_from_json(self.structure)
         callbacks = [keras.callbacks.ModelCheckpoint("NLP_CNN01.keras",save_best_only=True)]
-        self.model.fit(x,y, epochs=2, callbacks=callbacks)
+        self.model.fit(x,y, epochs=2, verbose=0, callbacks=callbacks)
 
     def isInDanger(self):
         return False
 
     def RandomFly(self):
-        self.model = build_model(max_tokens = self.max_tokens)
-        #self.init_weights = self.model.get_weights()
+        self.model = keras.models.model_from_json(self.structure)
         callbacks = [keras.callbacks.ModelCheckpoint("NLP_CNN01.keras",save_best_only=True)]
-        self.model.fit(self.x,self.y, epochs=2, callbacks=callbacks)
+        self.model.fit(self.x,self.y, epochs=2, verbose=0, callbacks=callbacks)
 
     def SearchContinue(self):
         old_weights = self.model.get_weights()
@@ -108,12 +92,13 @@ class Sparrow:
         return self.model.get_weights()
 
 class OptimizerSSA:
-    def __init__(self,model, max_tokens):
+    def __init__(self,model,loss,optimiser, max_tokens):
+        self.optimiser = optimiser
         self.max_tokens = max_tokens
         self.n_sparrows = NO_SPARROWS
         self.structure = model.to_json()
         self.sparrows = [None] * NO_SPARROWS
-        self.loss = LOSS
+        self.loss = loss
         self.length = len(model.get_weights())
        
         self.global_best_weights = None
@@ -122,7 +107,7 @@ class OptimizerSSA:
     def fit(self, x, y, steps=NO_ITERATIONS, batch_size=32):
 
         for i in range(self.n_sparrows):
-            self.sparrows[i] = Sparrow(x,y,max_tokens =self.max_tokens )
+            self.sparrows[i] = Sparrow(x,y,structure=self.structure,max_tokens =self.max_tokens )
 
         for s in self.sparrows:
             score = s.get_score(x, y)
@@ -131,9 +116,9 @@ class OptimizerSSA:
                 self.global_best_weights = s.get_weights()
 
         print("SSA -- train: {:.4f} ".format(self.global_best_score))
-    
-#        bar = ProgressBar(steps, updates=5)
+        bar = ProgressBar(steps)
         for i in range(steps):
+            bar.update(i)
             old_list_sparrows = sorted(self.sparrows, key=lambda s1: s1.get_score(x,y))
             new_list_sparrows = sorted(self.sparrows, key=lambda s1: s1.get_score(x,y))
 
@@ -145,8 +130,7 @@ class OptimizerSSA:
                 self.global_best_score = best_score
                 self.global_best_weights = BestSPARROWS.get_weights()
 
-            print("SSA -- iteration best score {:0.4f}".format(self.global_best_score))
-
+#           print("SSA -- iteration best score {:0.4f}".format(self.global_best_score))
             #sparrow - producers
             for j in range ( int(NO_PRD)):
                 s2 = new_list_sparrows[j]
@@ -182,12 +166,11 @@ class OptimizerSSA:
                     old_list_sparrows[j]  = new_list_sparrows[j]
 
             self.sparrows = old_list_sparrows
-#            bar.update(i)
 
-#        bar.done()
+        bar.done()
 
     def get_best_model(self):
         best_model = keras.models.model_from_json(self.structure)
-        best_model.compile(loss=LOSS,optimizer=OPTIMISER)
+        best_model.compile(loss=self.loss,optimizer=self.optimiser)
         best_model.set_weights(self.global_best_weights)
         return best_model
