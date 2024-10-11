@@ -120,8 +120,9 @@ class OptimizerSSA:
             if score < self.global_best_score:
                 self.global_best_score = score
                 self.global_best_weights = s.get_weights()
-        print("SSA -- initial best score: {:.4f} ".format(self.global_best_score))
+        print("SSA initial -- on train data - best score: {:.4f} ".format(self.global_best_score))
         bar = ProgressBar(steps)
+        
         for i in range(steps):
             bar.update(i)
             old_list_sparrows = sorted(self.sparrows, key=lambda s1: s1.s_score)
@@ -135,7 +136,6 @@ class OptimizerSSA:
                 self.global_best_score = best_score
                 self.global_best_weights = BestSPARROWS.get_weights()
 
-#            print("SSA -- iteration best score {:0.4f}".format(self.global_best_score))
             #sparrow - producers
             for j in range ( int(NO_PRD)):
                 s2 = new_list_sparrows[j]
@@ -173,6 +173,9 @@ class OptimizerSSA:
             self.sparrows = old_list_sparrows
 
         bar.done()
+        b_model = self.get_best_model()
+        score1 = b_model.evaluate(x, y)
+        print("SSA --> Final -- on train data - best score {:.4f}".format( score1))
 
     def get_best_model(self):
         best_model = keras.models.model_from_json(self.structure)

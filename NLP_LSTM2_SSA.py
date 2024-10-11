@@ -63,7 +63,7 @@ Histry = model.fit ( LSTM_X_train, encode_y_train,epochs=5,verbose=0)
 score1 = model.evaluate(LSTM_X_train, encode_y_train)
 score2 = model.evaluate(LSTM_X_test, encode_y_test)
 #print("rmsprop -- train_loss: {:.4f}  test: {:.4f}".format(score1, score2))
-print("rmsprop --> {:.4f}".format( score2))
+print("optimiser rmsprop- on test data --> {:.4f}".format( score2))
 model.save_weights('NLP_LSTRNNMDL.weights.h5')
 
 model_p =  get_model(max_tokens = len(text_vectorization.get_vocabulary()))
@@ -78,10 +78,9 @@ ssa.fit(LSTM_X_train, encode_y_train, batch_size=32)
 # Get a copy of the model with the globally best weights
 model_p = ssa.get_best_model()
 model_p.save_weights('NLP_LSTRNNMDL.SSA.weights.h5')
-p_train_score = model_p.evaluate(LSTM_X_train, encode_y_train, batch_size=32, verbose=0)
 p_test_score = model_p.evaluate(LSTM_X_test, encode_y_test, batch_size=32, verbose=0)
 #print("SSA -- train: {:.4f}  test: {:.4f}".format(p_train_score, p_test_score))
-print("SSA --> {:.4f}".format( p_test_score))
+print("optimiser SSA - on test data  --> {:.4f}".format( p_test_score))
 #code tyo genarate confusion_matrix
 y_pred = []
 pr = model_p.predict(LSTM_X_test)
